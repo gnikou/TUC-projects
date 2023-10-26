@@ -1,0 +1,56 @@
+gcc (Ubuntu 9.3.0-17ubuntu1~20.04) 9.3.0
+
+I did implement all tasks. Key generation functions as it should as well as encryption task. But decryption shows some good
+results but with garbage after them. Probably it is caused by now storing correctly in file the ciphertext of encryption.
+
+main.c : didn't change anything
+
+rsa.c:
+
+sieve_of_eratosthenes(): Initially I set an array of bools with size of limit+1. Using as reference
+the pseudocode from Wikipedia, I transform it into C code. Each non-prime number is set to 0 and afterwards
+I take all the bools that are equal to 1 and store it to a new array of size_t and return it as well as the 
+primes number with pointer reference.
+
+gcd(int a, int b): Using iterative method I get the gcd of numbers a and b. 
+
+choose_e(size_t fi_n): With the argument fi_n I generate a pool of primes with the help of sieve_of_eratosthenes.
+Then with the help of rand, srand and modulo I get a random prime to assign to e. But I check if all conditions are
+correct:  (e % fi(n) != 0) AND (gcd(e, fi(n)) == 1) AND (1 < e < fi(n)). If they are not I generate new prime number
+until one is valid for the conditions and I return it.
+
+mod_inverse(): To get the modular inverse I use the extended euclidean algorithm iteratively. At first I get the modulo
+of e with fi_n. Afterwards iteratively increase the i until fi_n until the e*i modulo fi_n is congruent to 1 and I return
+the i.
+
+modular_exp(): I calculate recursively the modular exponentiation of the encrypted/decrypted value using the property
+(m * n) % p =((m % p) * (n % p)) % p. I designed based on GeeksForGeeks implementation(https://www.geeksforgeeks.org/modular-exponentiation-recursive/)
+At first I get the m mod n and store it in m. Then i get the initital steps of recursion 
+and check whether m or d is equal to 0 and return 0. If d is equal to 1 I return the value of m. Afterwards I check 
+if d modulo 2 is equal to 0 and return recursively (m*(m%n),d/2,n)%n. Else I return m*recursively((m,d-1,n)%n)
+
+rsa_keygen(): At first I produced a pool of primes. Using srand, rand I get prime numbers p,q that are distinct as the article
+says. I get n as well as fi_n from p and q, unless fi_n is less than 3 where I generate new p and q numbers. This happens because
+1<e<fi_n and there are no primes below 3 to satisfy this condition. Afterwards it gets e from choose_e function and with fi_n it finds
+modular inverse d of e (mod fi_n). Finally with the help of store_keys it stores n,d in public.key and n,e in private.key
+
+rsa_encrypt():With the readFile I read the contents and size of plaintext given in input_file and key given in key_file. From key components I 
+separate n and d into two size_t's. I allocate plain_len * sizeof(size_t) bytes into the encryptted number c. Then iteratively for each char of 
+plaintext I cast it into size_t and then I call the modular exponentiation function to calculate the cipher char. Finally I write the
+ciphertext array of size_t's into the output file given.
+
+rsa_decrypt(): I read the contents and size of ciphertext as well as key. I get the n and e from key and also I get the number of chars that are
+going to be generated in plaintext getting the length of ciphertext/sizeof(size_t). Afterwards I copy the ciphertext into an array of size_t so I]
+can use it in modular exponentiation function. Finally I give the arguments of the array, e and n in modular_exp and cast (unsigned char) to get the
+chars of decrypted text. Finally I store decrypted text in output_file.
+
+
+
+utils.c: I developed somes helper functions there
+store_keys(): storing n,d in public.key file and n,e in private.key in this order.
+
+textFileLength(): used for debugging for file length
+
+readFile(): readfile function used in previous assignments too.
+
+
